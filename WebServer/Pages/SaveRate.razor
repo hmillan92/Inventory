@@ -1,0 +1,86 @@
+﻿@page "/saveRate"
+@page "/saveRate/{id:int}"
+@inject IRateServices _services;
+@inject NavigationManager _navigationManager;
+@inject IToastService _toastService;
+
+<PageTitle>Tasa</PageTitle>
+
+<h1>Tasa</h1>
+@if (rate == null)
+{
+    <p>Agregar</p>
+}
+else
+{
+    <p>Actualizar</p>
+}
+<br/>
+
+<EditForm Model="rate">
+    <div class="row">
+        <div class="col-sm-4">
+            <label>Valor $</label>
+            <input class="form-control col-sm-4" type="text" @bind="rate.Value"></input>
+        </div>
+    </div>
+    <div class="row" style="margin-top:20px;">
+        <div class="col-sm-4">
+            <label>Fecha</label>
+            <input class="form-control col-sm-4" type="date" @bind="rate.Fecha"/>
+        </div>
+    </div>
+    <div class="row" style="margin-top:20px;">
+        <div class="col-sm-4">         
+            <input class="btn btn-success" type="submit" value="Regresar" @onclick="Regresar" />
+            <input class="btn btn-primary" type="submit" value="Guardar" @onclick="Guardar" />
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private Rate? rate = new Rate();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var myRate = await _services.GetAllRates();
+
+        if (myRate?.Count > 0)
+        {
+            rate = myRate.FirstOrDefault();
+        }
+
+    }
+
+    private async Task Guardar()
+    {
+        if (rate?.Value <= 0)
+        {
+            _toastService.ShowError("Debe ingresar un valor mayor a 0.");
+            return;
+        }
+
+        string message = await _services.SaveRate(rate);
+
+        if (message.Contains("Error"))
+        {
+            _toastService.ShowError(message);
+        }
+
+        else
+        {
+            _toastService.ShowSuccess(message);
+        }
+
+        _navigationManager.NavigateTo("/rates");
+    }
+
+    private void Regresar()
+    {
+        _navigationManager.NavigateTo("/rates");
+    }
+}

@@ -1,0 +1,96 @@
+﻿@page "/saveProduct"
+@page "/saveProduct/{id:int}"
+@inject IProductServices _services;
+@inject NavigationManager _navigationManager;
+@inject IToastService _toastService;
+
+<PageTitle>Productos</PageTitle>
+
+<h1>Productos</h1>
+@if (product == null)
+{
+    <p>Agregar</p>
+}
+else
+{
+    <p>Actualizar</p>
+}
+<br/>
+
+<EditForm Model="product">
+    <div class="row">
+        <div class="col-sm-4">
+            <label>Descripcion</label>
+            <input class="form-control col-sm-4" type="text" @bind="product.Description"></input>
+        </div>
+    </div>
+    <div class="row" style="margin-top:20px;">
+        <div class="col-sm-4">
+            <label>Precio $</label>
+            <input class="form-control col-sm-4" type="number" step="0.1" min="0.1" @bind="product.DollarPrice"></input>
+        </div>
+    </div>
+    <div class="row" style="margin-top:20px;">
+        <div class="col-sm-4">         
+            <input class="btn btn-success" type="submit" value="Regresar" @onclick="Regresar" />
+            <input class="btn btn-primary" type="submit" value="Guardar" @onclick="Guardar" />
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private Product? product = new Product();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            product = await _services.GetProduct(Id);
+
+            if (product == null)
+            {
+                _navigationManager.NavigateTo("/NotFound");
+            }
+        }
+    }
+
+    private async Task Guardar()
+    {
+        if (string.IsNullOrWhiteSpace(product?.Description) || product?.DollarPrice <= 0)
+        {
+            _toastService.ShowError("No dejar campos vacios o en 0.");
+            return;
+        }
+
+        var existProduct = await _services.GetProduct(product?.Description);
+
+        if (existProduct != null)
+        {
+            _toastService.ShowError("Ya esxiste un producto con este nombre.");
+            return;
+        }
+
+        string message = await _services.SaveProduct(product);
+
+        if (message.Contains("Error"))
+        {
+            _toastService.ShowError(message);
+        }
+
+        else
+        {
+            _toastService.ShowSuccess(message);
+        }
+
+        _navigationManager.NavigateTo("/products");
+    }
+
+    private void Regresar()
+    {
+        _navigationManager.NavigateTo("/products");
+    }
+}

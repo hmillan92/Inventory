@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>WebServer</PageTitle>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+
+        <Blazored.Toast.BlazoredToasts Position="Blazored.Toast.Configuration.ToastPosition.BottomRight" Timeout="10" IconType="Blazored.Toast.Configuration.IconType.Material"/>
+    </main>
+</div>
+

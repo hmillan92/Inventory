@@ -1,0 +1,70 @@
+﻿@page "/products"
+@inject IProductServices _services;
+@inject IToastService _toastService;
+
+<PageTitle>Productos</PageTitle>
+
+<h1>Productos</h1>
+<p>Lista de Productos.</p>
+<br />
+<div>
+    <a href="saveProduct" class="btn btn-primary">Agregar</a>
+    <button class="btn btn-success" @onclick="FillTable">Obtener data desde Excell</button>
+</div>
+<br />
+<div>
+    @if (products == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Descripcion</th>
+                    <th>Precio Bs</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in products)
+                {
+                    <tr>
+                        <td>@product.Description</td>
+                        <td>@product.BsPrice</td>
+                        <td><a class="btn btn-warning" href="/saveProduct/@product.Id">Editar</a> &nbsp;&nbsp; <a class="btn btn-danger" href="/deleteProduct/@product.Id">Eliminar</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</div>
+
+@code {
+
+    private List<Product>? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await _services.GetAllProducts();
+    }
+
+    private async Task FillTable()
+    {
+        string fillTable = await _services.FillTable();
+
+        if (fillTable.Contains("Error"))
+        {
+            _toastService.ShowError(fillTable);
+        }
+
+        else
+        {
+            _toastService.ShowSuccess(fillTable);
+        }
+    }
+
+
+}

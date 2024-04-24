@@ -1,0 +1,50 @@
+﻿@page "/rates"
+@inject IRateServices _services;
+
+<PageTitle>Rate</PageTitle>
+
+<h1>Tasa</h1>
+<div><p>Tasa actual </p></div>
+<br />
+<div>
+    <a href="saveRate" class="btn btn-primary">Agregar</a>
+</div>
+<br />
+<div>
+    @if (rates == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Valor</th>
+                    <th>Fecha</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var rate in rates)
+                {
+                    <tr>
+                        <td>@rate.Value</td>
+                        <td>@rate.Fecha.ToShortDateString()</td>
+                        <td><a class="btn btn-warning" href="/saveRate/@rate.Id">Editar</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+
+@code {
+    private List<Rate>? rates;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rates = await _services.GetAllRates();
+    }
+}
